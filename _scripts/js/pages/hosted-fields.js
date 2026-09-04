@@ -1,0 +1,238 @@
+{
+const responseBlockEmpty = document.querySelector(".response-block-body-empty");
+const responseBlockContent = document.querySelector(".response-block-body-content");
+const responseBlock = document.querySelector(".response-block-outer");
+
+const hostedfieldsBlock = document.querySelector(".hosted-fields");
+const hostedfieldsSpinner = document.getElementById("hosted-fields-spinner");
+
+
+// Submit button
+const submitComponent = document.querySelector("submit-button-component");
+
+submitComponent.addEventListener("click", async () => {
+    hideResponseBlock(responseBlockEmpty, responseBlockContent, responseBlock);
+    hostedfieldsBlock.style.visibility = 'hidden';
+    hostedfieldsSpinner.classList.remove('hidden');
+
+    // Send payload to proxy
+    submitComponent.setLoading(true);
+    try {
+        let accessTokenPermissions = [
+            "PMT_POST_Create_Single"
+        ];
+        const accessTokenResponseData = await callProxy(BASE_URL + '_scripts/php/_proxy-create-access-token.php', accessTokenPayload(accessTokenPermissions));
+        console.log(accessTokenResponseData);
+        
+        if (accessTokenResponseData.response.body.token != null && accessTokenResponseData.response.body.token != "") {
+            initHostedFields(accessTokenResponseData.response.body.token);
+        }
+        else {
+            throw new Error(JSON.stringify(accessTokenResponseData));
+        }
+    } catch (err) {
+        console.log('Error: ' + JSON.stringify(JSON.parse(err.message).response.body));
+        hostedfieldsBlock.classList.add("hidden");
+        hostedfieldsSpinner.classList.add("hidden");
+        showResponseBlock(JSON.parse(err.message).response.body, responseBlockEmpty, responseBlockContent, responseBlock);
+    } finally {
+        submitComponent.setLoading(false);
+    }
+});
+
+
+// Payload for Create Access Token request
+function accessTokenPayload(permissions = null) {
+    const accessTokenPayload = {
+        appID: document.querySelector("#demo-app-id").value.trim(),
+        appKey: document.querySelector("#demo-app-key").value.trim(),
+        permissions
+    }
+
+    return accessTokenPayload;
+}
+
+// Payload for Create Transaction request
+function transactionPayload(accessToken, pmtID) {
+    let transactionPayload = {
+        accessToken,
+        pmtID,
+        account: document.querySelector("#demo-account").value.trim(),
+        amount: document.querySelector("#demo-amount").value.trim(),
+        currency: document.querySelector("#demo-currency").value.trim(),
+        country: document.querySelector("#demo-country").value.trim(),
+        captureMode: document.querySelector('field-select-component[input-id="demo-capturemode"]').value
+    }
+
+    return transactionPayload;
+}
+
+// Send payload to proxy after retrieving PMT ID
+async function transactionRequest(resp) {
+    try {
+        const accessTokenResponseData2 = await callProxy(BASE_URL + '_scripts/php/_proxy-create-access-token.php', accessTokenPayload());
+        console.log(accessTokenResponseData2);
+        
+        if (accessTokenResponseData2.response.body.token != null && accessTokenResponseData2.response.body.token != "") {
+            const transactionResponseData = await callProxy(BASE_URL + '_scripts/php/_proxy-create-transaction.php', transactionPayload(accessTokenResponseData2.response.body.token, resp.paymentReference));
+            console.log(transactionResponseData);
+
+            if (transactionResponseData.response.body.action.result_code == 'SUCCESS')
+            {
+                showResponseBlock(transactionResponseData.response.body, responseBlockEmpty, responseBlockContent, responseBlock);
+            }
+            else {
+                throw new Error(JSON.stringify(transactionResponseData));
+            }
+        }
+        else {
+            throw new Error(JSON.stringify(accessTokenResponseData2));
+        }
+    } catch (err) {
+        console.log('Error: ' + JSON.stringify(JSON.parse(err.message).response.body));
+        hostedfieldsBlock.classList.add("hidden");
+        hostedfieldsSpinner.classList.add("hidden");
+        showResponseBlock(JSON.parse(err.message).response.body, responseBlockEmpty, responseBlockContent, responseBlock);
+    } finally {
+        submitComponent.setLoading(false);
+    }
+}
+
+// -------------------------------------------------------------------------
+// Hosted Fields
+// -------------------------------------------------------------------------
+
+let cardForm = null;
+
+// Read resolved CSS variable values from the document so the hosted
+// fields iframes (which are cross-origin and can't access our CSS) still
+// reflect the current theme colours.
+function getBrandColors() {
+    const style = getComputedStyle(document.documentElement);
+    return {
+        brand:       style.getPropertyValue('--brand').trim(),
+        brandAccent: style.getPropertyValue('--brand-accent').trim(),
+        text:        style.getPropertyValue('--tertiary').trim(),
+        border:      style.getPropertyValue('--border-color').trim(),
+        secondary:   style.getPropertyValue('--secondary').trim(),
+    };
+}
+
+// Watch for theme changes and reinitialise the card form with updated colours.
+// Only reinitialise if the hosted fields are currently visible (i.e. a token
+// has already been issued and the fields are showing).
+new MutationObserver(() => {
+    if (hostedfieldsBlock.style.visibility === 'visible') {
+        initHostedFields();
+    }
+}).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+function initCardForm() {
+    const { brand, brandAccent, text, border, secondary } = getBrandColors();
+    return GlobalPayments.ui.form({
+        fields: {
+            "card-number": {
+                placeholder: "Card Number",
+                target: "#card-number"
+            },
+            "card-expiration": {
+                placeholder: "MM/YYYY",
+                target: "#card-expiration"
+            },
+            "card-cvv": {
+                placeholder: "Security Code",
+                target: "#card-cvv"
+            },
+            "card-holder-name": {
+                placeholder: "Cardholder Name",
+                target: "#card-holder-name"
+            },
+            "submit": {
+                text: "Pay Now", // Change the text of the button
+                target: "#submit-button",
+                value: "Pay Now"
+            }
+        },
+        styles: {
+            "input[type=text], input[type=tel]": {
+                "color": text,
+                "background-color": secondary,
+                "padding": "8px 12px",
+                "margin": "4px 0 !important",
+                "border": `1px solid ${border}`,
+                "border-radius": "8px",
+                "font-size": "13px",
+                "width": "100%",
+                "box-sizing": "border-box",
+            },
+            "input[type=text]:focus-visible, input[type=tel]:focus-visible": {
+                "outline": "none !important",
+                "border": `1px solid ${brand}`,
+            },
+            "button[type=button]": {
+                "background-color": brand,
+                "color": "white",
+                "padding": "10px 24px",
+                "border": "none",
+                "border-radius": "8px",
+                "cursor": "pointer",
+                "font-size": "14px",
+                "font-weight": "600",
+                "width": "100%",
+            },
+            "button[type=button]:hover": {
+                "background-color": brandAccent,
+            },
+        }
+    });
+}
+
+function initHostedFields(accessToken = '') {
+    if(cardForm != null) {
+        cardForm.dispose();
+    }
+
+    // configuring Hosted Fields
+    if(accessToken != '') {
+        GlobalPayments.configure({
+            accessToken: accessToken,
+            apiVersion: "2021-03-22",
+            env: "sandbox" // or "production"
+        });
+    }
+
+    // Unhide before reinit so iframes can measure their container.
+    // visibility:hidden keeps layout intact without showing empty fields.
+    hostedfieldsBlock.style.visibility = 'hidden';
+    hostedfieldsBlock.classList.remove('hidden');
+    hostedfieldsSpinner.classList.remove('hidden');
+    cardForm = initCardForm();
+
+    // method to notify that hosted fields have been initialized
+    cardForm.ready(() => {
+        console.log("Registration of all credit card fields occurred");
+        hostedfieldsSpinner.classList.add('hidden');
+        hostedfieldsBlock.style.visibility = 'visible';
+        slowScrollTo(document.querySelector(".content"), hostedfieldsBlock, 1000);
+    });
+   
+    // Display the tokenisation response in the response block instead of
+    // submitting the form — this is a test tool, not a checkout page.
+    cardForm.on("token-success", (resp) => {
+        console.log(resp);
+        transactionRequest(resp);
+    });
+
+    // add error handling if token generation is not successful
+    cardForm.on("token-error", (resp) => {
+        // TODO: Add your error handling
+        console.log(resp);
+        showResponseBlock(resp, responseBlockEmpty, responseBlockContent, responseBlock);
+    });
+
+    // field-level event handlers. example:
+    cardForm.on("card-number", "register", () => {
+        console.log("Registration of Card Number occurred");
+    });
+}
+}

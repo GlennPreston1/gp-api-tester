@@ -1,0 +1,38 @@
+<?php
+if (!isset($pageTitle)) {
+    $pageTitle = "GP API Tester";
+}
+?>
+
+<head>
+		<title><?= htmlspecialchars($pageTitle) ?></title>
+		<base href="<?= BASE_URL ?>">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<script>
+			const saved = localStorage.getItem("theme");
+			if (saved) document.documentElement.setAttribute("data-theme", saved);
+		</script>
+
+		<!-- CSS -->
+		<link href="./_css/main.css" rel="stylesheet">
+
+		<!-- Fonts -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+		
+		<!-- Components -->
+		<script src="./_components/navbar-component.js" type="text/javascript" defer></script>
+		<script src="./_components/sidebar-component.js" type="text/javascript" defer></script>
+		<script src="./_components/toggle-switch-component.js" type="text/javascript" defer></script>
+		<script src="./_components/submit-button-component.js" type="text/javascript" defer></script>
+		<script src="./_components/profile-selector-component.js" type="text/javascript" defer></script>
+		<script src="./_components/demo-fieldset-credentials-component.js" type="text/javascript" defer></script>
+		<script src="./_components/demo-fieldset-notification-urls-component.js" type="text/javascript" defer></script>
+		<script src="./_components/demo-input-field-select-component.js" type="text/javascript" defer></script>
+		<script src="./_components/demo-input-multi-select-component.js" type="text/javascript" defer></script>
+		<script src="./_components/demo-input-date-picker-component.js" type="text/javascript" defer></script>
+
+		<script src="https://js.globalpay.com/4.1.11/globalpayments.js"></script>
+</head>

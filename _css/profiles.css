@@ -1,0 +1,289 @@
+/* ---------------------------------------------------------------------------
+   Left column — profile list
+--------------------------------------------------------------------------- */
+
+.profiles-col-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    position: sticky;
+    top: 20px;
+}
+
+.profile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.profile-list-empty {
+    padding: 12px 10px;
+    font-size: 13px;
+    color: var(--content-text);
+    opacity: 0.4;
+}
+
+.profile-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 9px 12px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--content-text);
+    background: none;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    gap: 8px;
+}
+
+.profile-list-item:hover {
+    background: var(--secondary-accent);
+}
+
+.profile-list-item.selected {
+    background: var(--secondary-accent);
+    color: var(--brand);
+}
+
+.profile-list-item-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+}
+
+.profile-list-active-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--brand);
+    flex-shrink: 0;
+}
+
+/* Add profile button */
+.btn-add-profile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--brand);
+    background: none;
+    border: 1.5px dashed var(--brand);
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn-add-profile:hover {
+    color: var(--brand-accent);
+    border-color: var(--brand-accent);
+    background: var(--secondary-accent);
+}
+.btn-add-profile:active { transform: scale(0.98); }
+
+.btn-add-profile svg {
+    width: 11px;
+    height: 11px;
+}
+
+/* ---------------------------------------------------------------------------
+   Right column — profile detail
+--------------------------------------------------------------------------- */
+
+/* Detail header */
+.profile-detail-header{
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.profile-detail-title{
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--content-text);
+}
+
+/* Empty state */
+.profile-detail-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 60px 24px;
+    color: var(--content-text);
+    opacity: 0.3;
+}
+
+.profile-detail-empty svg {
+    width: 44px;
+    height: 44px;
+}
+
+.profile-detail-empty p {
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* Form actions */
+.profile-detail-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    padding-top: 16px;
+}
+
+.btn-save {
+    display: inline-flex;
+    justify-content: center;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--brand);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    min-width: 100px;
+}
+.btn-save:hover    { background: var(--brand-accent); }
+.btn-save:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-save:active { transform: scale(0.98); }
+
+.btn-delete {
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--btn-danger-text);
+    background: var(--btn-danger-bg);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-left: auto;
+    min-width: 100px;
+}
+.btn-delete:hover { background: var(--btn-danger-bg-hover); }
+.btn-delete:active { transform: scale(0.98); }
+
+/* Spinner */
+.btn-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Feedback */
+.profile-feedback {
+    margin-top: 20px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 7px;
+}
+
+.profile-feedback-success {
+    background: var(--success-bg);
+    color: var(--success-text);
+}
+
+.profile-feedback-error {
+    background: var(--error-bg);
+    color: var(--error-text);
+}
+
+/* ---------------------------------------------------------------------------
+   Deletion confirmation modal
+--------------------------------------------------------------------------- */
+
+/* Modal Overlay */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Modal */
+.modal-content {
+    min-width: 250px;
+    max-width: 650px;
+    padding: 20px;
+    border-radius: 10px;
+
+    background: var(--secondary);
+    color: var(--content-text);
+    border: 1px solid var(--border-color);
+
+    box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+    animation: popup var(--transition-duration) var(--transition-easing);
+}
+
+@keyframes popup {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal-content h2 {
+    margin-bottom: 15px;
+    color: var(--content-text);
+}
+
+.modal-content p {
+    margin-bottom: 25px;
+    color: var(--content-text);
+    opacity: 0.8;
+    line-height: 1.5;
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-between;
+}
+
+.buttons button {
+    width: 48%;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+/* Cancel button */
+.cancel {
+    background: var(--primary);
+    color: var(--content-text);
+    border-color: var(--border-color);
+}
+.cancel:hover { background: var(--primary-accent); }
+.cancel:active { transform: scale(0.98); }
+
+/* Delete button */
+.delete {
+    background: var(--btn-danger-bg);
+    color: var(--btn-danger-text);
+}
+.delete:hover { background: var(--btn-danger-bg-hover); }
+.delete:active { transform: scale(0.98); }
